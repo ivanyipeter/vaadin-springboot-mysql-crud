@@ -50,14 +50,14 @@ public class MainView extends VerticalLayout {
         grid.asSingleSelect().addValueChangeListener(e -> {
             personEditor.editPerson(e.getValue());
         });
-//
+
         addNewButton.addClickListener(e -> personEditor.editPerson(new Person("", "")));
         personEditor.setChangeHandler(() -> {
             personEditor.setVisible(false);
             filterBy(filter.getValue());
         });
 
-        filterBy(null);
+//        filterBy(null);
     }
 
 

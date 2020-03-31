@@ -10,10 +10,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Component
@@ -28,9 +31,11 @@ public class PersonEditor extends VerticalLayout implements KeyNotifier {
     private Person person;
 
     Button save = new Button("Save", VaadinIcon.CHECK.create());
+    Button serialize = new Button("Serialize", VaadinIcon.CHECK_CIRCLE.create());
+    Button deSerialize = new Button("Deserialize", VaadinIcon.CHECK_CIRCLE.create());
     Button cancel = new Button("Cancel");
     Button delete = new Button("Delete", VaadinIcon.TRASH.create());
-    HorizontalLayout actions = new HorizontalLayout(save, cancel, delete);
+    HorizontalLayout actions = new HorizontalLayout(save, cancel, delete, serialize, deSerialize);
 
     Binder<Person> binder = new Binder<>(Person.class);
     private ChangeHandler changeHandler;
@@ -53,6 +58,9 @@ public class PersonEditor extends VerticalLayout implements KeyNotifier {
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
         cancel.addClickListener(e -> editPerson(person));
+        serialize.addClickListener(e -> serializePersonList());
+        deSerialize.addClickListener(e -> deSerializePersonList());
+
 
     }
 
@@ -85,6 +93,41 @@ public class PersonEditor extends VerticalLayout implements KeyNotifier {
         binder.setBean(person);
         setVisible(true);
         firstName.focus();
+    }
+
+    public void serializePersonList() {
+
+        List<Person> personList = personRepository.findAll();
+
+        try {
+            FileOutputStream fos = new FileOutputStream("Personlist");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(personList);
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void deSerializePersonList() {
+
+        List<Person> personList = new ArrayList<>();
+
+        try {
+            FileInputStream fis = new FileInputStream("Personlist");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            personList = (ArrayList) ois.readObject();
+            fis.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        for (Person p : personList
+        ) {
+            System.out.println(p);
+
+        }
     }
 
     public void setChangeHandler(ChangeHandler h) {
